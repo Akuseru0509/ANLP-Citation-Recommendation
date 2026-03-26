@@ -9,6 +9,8 @@ kagglesdk==0.1.16
 numpy==2.4.3
 packaging==26.0
 pandas==3.0.1
+polars==1.39.3
+polars-runtime-32==1.39.3
 protobuf==7.34.1
 python-dateutil==2.9.0.post0
 PyYAML==6.0.3

@@ -9,7 +9,7 @@ DATA_DIR = BASE_DIR / "data"
 
 kagglehub.login()
 
-if not os.path.exist(DATA_DIR):
+if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 path = kagglehub.dataset_download("Cornell-University/arxiv", output_dir=DATA_DIR)
