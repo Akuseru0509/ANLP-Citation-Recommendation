@@ -1,2 +1,3 @@
 .venv
-data
+data/.complete
+data/arxiv-metadata-oai-snapshot.json
