@@ -1,25 +1,34 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter, Link, useLocation } from 'react-router-dom';
+import AppRoutes from './routes';
 import './App.css';
+
+function NavBar() {
+  const location = useLocation();
+
+  return (
+    <nav className="navbar" id="navbar">
+      <div className="navbar-brand">
+        <span className="navbar-logo">📑</span>
+        <span className="navbar-title">CiteRec</span>
+      </div>
+      <div className="navbar-links">
+        <Link to="/" className={`nav-link${location.pathname === '/' ? ' active' : ''}`}>Home</Link>
+        <Link to="/chatbot" className={`nav-link${location.pathname === '/chatbot' ? ' active' : ''}`}>Chatbot</Link>
+      </div>
+    </nav>
+  );
+}
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        <NavBar />
+
+        <AppRoutes />
+      </div>
+    </BrowserRouter>
   );
 }
 
