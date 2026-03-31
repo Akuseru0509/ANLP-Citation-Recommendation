@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './HomePage.css';
 
 /* ---------- Mock data ---------- */
@@ -55,6 +55,67 @@ const MOCK_PAPERS = [
   },
 ];
 
+
+/* ---------- Custom Dropdown ---------- */
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface CustomSelectProps {
+  id?: string;
+  value: string;
+  options: Option[];
+  onChange: (value: string) => void;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ id, value, options, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const selectedLabel = options.find((opt) => opt.value === value)?.label || '';
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="custom-select-container" id={id} ref={containerRef}>
+      <button
+        type="button"
+        className={`custom-select-btn ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        {selectedLabel}
+      </button>
+      {isOpen && (
+        <ul className="custom-select-list" role="listbox">
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              className={`custom-select-option ${opt.value === value ? 'selected' : ''}`}
+              role="option"
+              aria-selected={opt.value === value}
+              onClick={() => {
+                onChange(opt.value);
+                setIsOpen(false);
+              }}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 /* ---------- Component ---------- */
 const HomePage: React.FC = () => {
@@ -146,30 +207,32 @@ const HomePage: React.FC = () => {
             <h3>Filters</h3>
             <div className="filter-group">
               <label htmlFor="year-filter">Year Range</label>
-              <select
+              <CustomSelect
                 id="year-filter"
                 value={yearFilter}
-                onChange={(e) => setYearFilter(e.target.value)}
-              >
-                <option value="all">All Years</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2020-2022">2020 – 2022</option>
-                <option value="2015-2019">2015 – 2019</option>
-                <option value="before-2015">Before 2015</option>
-              </select>
+                onChange={setYearFilter}
+                options={[
+                  { value: 'all', label: 'All Years' },
+                  { value: '2024', label: '2024' },
+                  { value: '2023', label: '2023' },
+                  { value: '2020-2022', label: '2020 – 2022' },
+                  { value: '2015-2019', label: '2015 – 2019' },
+                  { value: 'before-2015', label: 'Before 2015' },
+                ]}
+              />
             </div>
             <div className="filter-group">
               <label htmlFor="sort-by">Sort By</label>
-              <select
+              <CustomSelect
                 id="sort-by"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="relevance">Relevance</option>
-                <option value="citations">Citations</option>
-                <option value="year">Year (Newest)</option>
-              </select>
+                onChange={setSortBy}
+                options={[
+                  { value: 'relevance', label: 'Relevance' },
+                  { value: 'citations', label: 'Citations' },
+                  { value: 'year', label: 'Year (Newest)' },
+                ]}
+              />
             </div>
           </div>
         </div>
