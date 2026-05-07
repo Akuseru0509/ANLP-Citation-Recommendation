@@ -40,6 +40,8 @@ class DataProcessor():
                 ).alias("year")
             ).with_columns(
                 pl.col("categories").str.split(" ").alias("splitted_categories")
+            ).with_columns(
+                pl.lit(0, dtype=pl.Int16).alias("ratings")
             ).filter(
                 (pl.col("year") >= 2015) & (pl.col("year") <= 2026)
             ).filter(
@@ -86,7 +88,7 @@ class DataProcessor():
 
                 metadatas = (
                     batch.select(
-                        ["year", "authors", "categories"]
+                        ["title", "abstract", "year", "authors", "categories", "ratings"]
                     ).to_dicts()
                 )
 

@@ -2,3 +2,4 @@
 data
 .streamlit
 src/backend/db
+src/backend/model
