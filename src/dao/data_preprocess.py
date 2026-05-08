@@ -1,6 +1,9 @@
 from pathlib import Path
 import polars as pl
 from tqdm import tqdm
+import json
+import requests
+import os
 
 # import nltk
 # nltk.download('punkt')
@@ -69,7 +72,79 @@ class DataProcessor():
 
         except Exception as e:
             raise ValueError(f"[ERROR]: {e}")
-        
+
+    def _create_papers(self, df):
+        try:
+            def get_year_month(arxiv_id: str):
+                if "/" in arxiv_id:
+                    part = arxiv_id.split("/")[1]
+
+                    yy = int(part[:2])
+                    mm = int(part[2:4])
+
+                    year = 1900 + yy if yy >= 90 else 2000 + yy
+
+                    return {
+                        "year": year,
+                        "month": mm
+                    }
+
+                return {
+                    "year": 2000 + int(arxiv_id[:2]),
+                    "month": int(arxiv_id[2:4])
+                }
+
+            df = (
+                df
+                .select(
+                    pl.col(["id", "authors", "abstract", "title"])
+                )
+                .with_columns(
+                    pl.col("authors").map_elements(
+                        lambda x: x.strip().split(","),
+                        return_dtype=pl.List(pl.String)
+                    )
+                )
+                .with_columns(
+                    pl.lit("ArXiv").alias("venue"),
+                    pl.lit("").alias("venueType")
+                )
+                .with_columns(
+                    pl.col("id").map_elements(
+                        get_year_month,
+                        return_dtype=pl.Struct({
+                            "year": pl.Int16,
+                            "month": pl.Int8
+                        })
+                    ).alias("date")
+                )
+                .unnest("date")
+                .filter(
+                    (pl.col("year") >= 2015) &
+                    (pl.col("year") <= 2026)
+                )
+            )
+
+            rows = df.to_dicts()
+
+            result = {
+                row["id"]: row
+                for row in tqdm(rows, desc="Building JSON")
+                if row["id"] is not None
+            }
+
+            final_json = {
+                "root": result
+            }
+
+            output_path = DATA_DIR / "papers.json"
+
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(final_json, f, indent=2)
+        except FileNotFoundError:
+            raise ValueError(f"Error: No file found at {self.data_path}")
+        except Exception as e:
+            raise ValueError(f"Error: {e}")    
         
     def _add_to_db(self, df: pl.DataFrame):
         try:
@@ -110,6 +185,9 @@ if __name__ == "__main__":
 
     print("[INFO]: Splitting Data...")
     df = processor._split(df)
+
+    print("[INFO]: Creating papers.json")
+    processor._create_papers(df)
 
     print("[INFO]: Adding To Vector Database...")
     processor._add_to_db(df)
