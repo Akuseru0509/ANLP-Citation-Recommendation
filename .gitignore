@@ -2,5 +2,5 @@
 data
 .streamlit
 src/backend/db
-src/backend/model
+src/backend/model/*.pt
 src/dao/.env

@@ -2,8 +2,6 @@ from pathlib import Path
 import polars as pl
 from tqdm import tqdm
 import json
-import requests
-import os
 
 # import nltk
 # nltk.download('punkt')
@@ -63,7 +61,7 @@ class DataProcessor():
 
             train, test = train_test_split(
                 pdf,
-                test_size=0.1,
+                test_size=0.02,
                 stratify=pdf["year"],
                 random_state=42
             )

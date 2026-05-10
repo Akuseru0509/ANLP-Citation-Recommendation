@@ -2,8 +2,8 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from src.backend.db.chroma import collection
-from src.backend.src.init import router
-from backend.src.utils.scibert import scibert_reranking
+from src.backend.scripts.init import router
+from src.backend.scripts.utils.scibert import scibert_reranking
 
 @router.post("/{paper_id}")
 def add_ratings(paper_id: str):

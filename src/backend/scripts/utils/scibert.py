@@ -1,27 +1,12 @@
 from pathlib import Path
 from chromadb import QueryResult
 import torch
-from transformers import AutoModel, AutoTokenizer
-import torch.nn
-import torch.nn.functional as F
+from transformers import AutoTokenizer
 from keybert import KeyBERT
+from src.backend.model.scripts.scorer import Scorer
 
 BASE_DIR = Path(__file__).parents[0].parents[0].parents[0].resolve()
 MODEL_DIR = BASE_DIR / "model"
-
-class Scorer(torch.nn.Module):
-    def __init__(self, model_name, vocab_size, embedding_dims = 768):
-        super().__init__()
-        self.bert_model = AutoModel.from_pretrained(model_name)
-        self.bert_model.resize_token_embeddings(vocab_size)
-        self.ln_score = torch.nn.Linear(embedding_dims, 1)
-
-    def forward(self, inputs):
-        net = self.bert_model(**inputs)[0]
-        net = net[:, 0, :].contiguous()
-        score = F.sigmoid(self.ln_score(F.relu(net))).squeeze(1)
-
-        return score
 
 class ModelInference:
     def __init__(self, model_path, base_model):
