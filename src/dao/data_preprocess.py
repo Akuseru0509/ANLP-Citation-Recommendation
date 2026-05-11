@@ -118,8 +118,7 @@ class DataProcessor():
                 )
                 .unnest("date")
                 .filter(
-                    (pl.col("year") >= 2015) &
-                    (pl.col("year") <= 2026)
+                    (pl.col("year") >= 2015) & (pl.col("year") <= 2026)
                 )
             )
 
@@ -172,6 +171,25 @@ class DataProcessor():
                 )
         except Exception as e:
             raise ValueError(f"[ERROR]: {e}")
+        
+    def _train_test_split(self, df):
+        try:
+            pdf = df.to_pandas()
+
+            train, test = train_test_split(
+                pdf,
+                test_size=0.2,
+                stratify=pdf["year"],
+                random_state=42
+            )
+
+            train_df = pl.from_pandas(train)
+            test_df = pl.from_pandas(test)
+
+            train_df.write_json(DATA_DIR / "train_metadata.json")
+            test_df.write_json(DATA_DIR / "test_metadata.json")
+        except Exception as e:
+            raise ValueError(f"Error: {e}")
 
 if __name__ == "__main__":
     DATA_PATH = DATA_DIR / "arxiv-metadata-oai-snapshot.json"
@@ -183,6 +201,9 @@ if __name__ == "__main__":
 
     print("[INFO]: Splitting Data...")
     df = processor._split(df)
+
+    print("[INFO]: Split to train/test...")
+    processor._train_test_split(df)
 
     print("[INFO]: Creating papers.json")
     processor._create_papers(df)

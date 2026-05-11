@@ -37,10 +37,7 @@ class Prefetcher:
 
 
     @staticmethod
-    def build_corpus(
-        context_list: list,
-        output_path: str = "train_corpus.json"
-    ) -> list[dict]:
+    def build_corpus(context_list: list, output_path: str = "train_corpus.json") -> list[dict]:
         corpus = [
             {
                 "context_id":    ctx["context_id"],
@@ -96,12 +93,7 @@ class Prefetcher:
 
         return corpus
 
-    def _run(
-        self,
-        input_path: str,
-        output_path: Optional[str] = None,
-        overwrite: bool = False,
-    ) -> list[dict]:
+    def _run(self, input_path: str, output_path: Optional[str] = None, overwrite: bool = False) -> list[dict]:
         input_path  = Path(input_path)
         output_path = Path(output_path) if output_path else input_path
 
@@ -127,21 +119,21 @@ if __name__ == "__main__":
 
     encoder = SentenceTransformer("all-MiniLM-L6-v2")
     contexts = json.load(open(DATA_DIR /"contexts.json", "r", encoding="utf-8"))
-    papers = json.load(open(DATA_DIR / "papers.json", "r", encoding="utf-8"))
+    papers = json.load(open(DATA_DIR / "papers.json", "r", encoding="utf-8"))["root"]
     contexts_database = {ctx["context_id"]: ctx for ctx in contexts}
 
     print("[INFO]: Initializing prefetcher...")
     prefetcher = Prefetcher(
         collection = collection,
-        encoder= encoder,
-        context_database= contexts_database,
-        paper_database= papers
+        encoder = encoder,
+        context_database = contexts_database,
+        paper_database = papers
     )
 
     print("[INFO]: Building corpus...")
     corpus = prefetcher.build_corpus(
-        context_list=contexts,
-        output_path=DATA_DIR / "train_corpus.json"
+        context_list = contexts,
+        output_path = DATA_DIR / "train_corpus.json"
     )
 
     print("[INFO]: Building train set...")
