@@ -1,5 +1,6 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from src.backend.scripts.utils.llm import llm_classifier
 
 def verify_query(request: Request):
     params = request.query_params
@@ -30,3 +31,14 @@ def verify_query(request: Request):
                     "Error": "Invalid Query Params"
                 }
             )
+        
+    query = params.get("query")
+    response = llm_classifier(query)
+
+    if not response:
+        return JSONResponse(
+            status_code=403,
+            content={
+                "Error": "No Citation Needed"
+            }
+        )

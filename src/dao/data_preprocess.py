@@ -61,7 +61,7 @@ class DataProcessor():
 
             train, test = train_test_split(
                 pdf,
-                test_size=0.02,
+                test_size=0.05,
                 stratify=pdf["year"],
                 random_state=42
             )

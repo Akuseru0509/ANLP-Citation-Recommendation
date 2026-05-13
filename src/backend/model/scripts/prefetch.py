@@ -17,47 +17,59 @@ class Prefetcher:
         encoder,
         context_database: dict,
         paper_database: dict,
-        rerank_top_K: int     = 500,
+        rerank_top_K: int = 500,
         max_input_length: int = 512,
-        sep_token: str        = "<sep>",
-        cit_token: str        = "<cit>",
-        batch_size: int       = 32,
-        resume: bool          = True,
+        sep_token: str = "<sep>",
+        cit_token: str = "<cit>",
+        batch_size: int = 32,
+        resume: bool = True,
     ):
-        self.collection       = collection
-        self.encoder          = encoder
+        self.collection = collection
+        self.encoder = encoder
         self.context_database = context_database
-        self.paper_database   = paper_database
-        self.rerank_top_K     = rerank_top_K
+        self.paper_database = paper_database
+        self.rerank_top_K = rerank_top_K
         self.max_input_length = max_input_length
-        self.sep_token        = sep_token
-        self.cit_token        = cit_token
-        self.batch_size       = batch_size
-        self.resume           = resume
+        self.sep_token = sep_token
+        self.cit_token = cit_token
+        self.batch_size = batch_size
+        self.resume = resume
 
 
     @staticmethod
-    def build_corpus(context_list: list, output_path: str = "train_corpus.json") -> list[dict]:
-        corpus = [
-            {
-                "context_id":    ctx["context_id"],
-                "positive_ids":  [ctx["refid"]],
-                "prefetched_ids": [],
-            }
-            for ctx in context_list
-        ]
-        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    def build_corpus(train_metadata: list, test_metadata: list,
+                    context_list: list,
+                    train_output: str = "train_corpus.json",
+                    test_output: str = "test_corpus.json") -> tuple[list[dict], list[dict]]:
 
-        json.dump(corpus, open(output_path, "w"), indent=2)
-        return corpus
+        def _build(metadata, contexts):
+            meta_ids = {m["id"] for m in metadata}
+            return [
+                {
+                    "context_id":     ctx["context_id"],
+                    "positive_ids":   [ctx["refid"]],
+                    "prefetched_ids": [],
+                }
+                for ctx in contexts
+                if ctx["citing_id"] in meta_ids
+            ]
+
+        train_corpus = _build(train_metadata, context_list)
+        test_corpus = _build(test_metadata,  context_list)
+
+        for corpus, path in [(train_corpus, train_output), (test_corpus, test_output)]:
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
+            json.dump(corpus, open(path, "w"), indent=2)
+
+        return train_corpus, test_corpus
 
     def _get_paper_text(self, paper_id: str) -> str:
         info = self.paper_database.get(paper_id, {})
         return info.get("title", "") + " " + info.get("abstract", "")
 
     def _build_query_text(self, job: dict) -> str:
-        ctx          = self.context_database[job["context_id"]]
-        citing_text  = self._get_paper_text(ctx["citing_id"])
+        ctx = self.context_database[job["context_id"]]
+        citing_text = self._get_paper_text(ctx["citing_id"])
         context_text = ctx["masked_text"].replace("TARGETCIT", self.cit_token)
 
         truncated = " ".join(citing_text.split()[:int(self.max_input_length * 0.35)])
@@ -97,9 +109,7 @@ class Prefetcher:
         input_path  = Path(input_path)
         output_path = Path(output_path) if output_path else input_path
 
-        load_path = (output_path
-                     if (not overwrite and output_path.exists())
-                     else input_path)
+        load_path = (output_path if (not overwrite and output_path.exists()) else input_path)
 
         corpus = json.load(open(load_path))
 
@@ -122,6 +132,9 @@ if __name__ == "__main__":
     papers = json.load(open(DATA_DIR / "papers.json", "r", encoding="utf-8"))["root"]
     contexts_database = {ctx["context_id"]: ctx for ctx in contexts}
 
+    train_metadata = json.load(open(DATA_DIR / "train_metadata.json", "r", encoding="utf-8"))
+    test_metadata = json.load(open(DATA_DIR / "test_metadata.json",  "r", encoding="utf-8"))
+
     print("[INFO]: Initializing prefetcher...")
     prefetcher = Prefetcher(
         collection = collection,
@@ -131,12 +144,18 @@ if __name__ == "__main__":
     )
 
     print("[INFO]: Building corpus...")
-    corpus = prefetcher.build_corpus(
-        context_list = contexts,
-        output_path = DATA_DIR / "train_corpus.json"
+    prefetcher.build_corpus(
+        train_metadata = train_metadata,
+        test_metadata = test_metadata,
+        context_list=contexts,
+        train_output = DATA_DIR / "train_corpus.json",
+        test_output = DATA_DIR / "test_corpus.json",
     )
 
-    print("[INFO]: Building train set...")
-    prefetcher._run(DATA_DIR / "train_corpus.json", DATA_DIR / "train.json")
+    print("[INFO]: Prefetching splits...")
+    prefetcher.run_splits({
+        "train": (DATA_DIR / "train_corpus.json", DATA_DIR / "train.json"),
+        "test":  (DATA_DIR / "test_corpus.json", DATA_DIR / "test.json"),
+    })
 
     print("[INFO]: Success!")

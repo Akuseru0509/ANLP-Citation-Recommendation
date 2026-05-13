@@ -57,4 +57,15 @@ def get_queried_papers(request: Request):
 
     results = scibert_reranking(query, results)
 
-    return JSONResponse(status_code=200, content=dict(results))
+    if results is None:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "Error": "No Citation Found!"
+            }
+        )    
+
+    return JSONResponse(
+        status_code=200, 
+        content=dict(results)
+    )

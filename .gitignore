@@ -4,3 +4,4 @@ data
 src/backend/db
 src/backend/model/*.pt
 src/dao/.env
+src/backend/scripts/utils/.env
