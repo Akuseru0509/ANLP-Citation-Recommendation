@@ -9,7 +9,7 @@ client = Groq(api_key=API_KEY)
 
 def needs_citation(query: str) -> bool:
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",  # free + fast
+        model="llama-3.1-8b-instant",
         max_tokens=5,
         temperature=0,
         messages=[{
@@ -17,9 +17,35 @@ def needs_citation(query: str) -> bool:
             "content": f"Does this statement make a factual claim that requires evidence or a reference to verify? Answer YES or NO only.\nStatement: {query}"
         }]
     )
+
     return response.choices[0].message.content.strip().upper() == "YES"
 
-if __name__ == "__main__":
-    query = "Our model performed slightly better than the pretrained SciBERT"
+def get_summary(result: dict):
+    prompt = f"""You are a scientific paper assistant.
+        Given the abstract of a retrieved paper, write a concise summary capturing its key findings.
 
-    print(needs_citation(query))
+        Abstract:
+        {result.get("abstract")}
+
+        Write a 3-4 sentence summary that:
+        - Captures the key findings, methods, and conclusions
+        - Uses precise scientific language
+
+    Summary:"""
+
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        max_tokens=200,
+        temperature=0.3,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    
+    return response.choices[0].message.content.strip()
+
+def summarize(query, results: list[dict]) -> list[dict]:
+    for i in range(0, len(results)):
+        results[i].add({
+            "summary": get_summary(query, results[i])
+        })
+
+    return results

@@ -39,7 +39,7 @@ def paper_detail_dialog() -> None:
     if paper is None:
         return
 
-    sc    = paper["score"]
+    sc = paper["score"]
     color = score_color(sc)
     label = score_label(sc)
 

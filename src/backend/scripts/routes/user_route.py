@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from src.backend.db.chroma import collection
 from src.backend.scripts.init import router
 from src.backend.scripts.utils.scibert import scibert_reranking
+from src.backend.scripts.utils.llm import summarize
 
 @router.post("/{paper_id}")
 def add_ratings(paper_id: str):
@@ -64,6 +65,8 @@ def get_queried_papers(request: Request):
                 "Error": "No Citation Found!"
             }
         )    
+
+    results = summarize(query, results)
 
     return JSONResponse(
         status_code=200, 
