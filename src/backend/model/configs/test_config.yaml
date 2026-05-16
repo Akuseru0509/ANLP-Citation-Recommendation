@@ -1,0 +1,19 @@
+initial_model_path: "allenai/scibert_scivocab_uncased"
+trained_model_path: "../checkpoints/final/model_batch_5072.pt"
+contexts_path: "../../../../data/contexts.json"
+papers_path: "../../../../data/papers.json"
+test_path: "../../../../data/test.json"
+rerank_results_save_path: "../output"
+
+rerank_top_K: 500
+K_list: [1, 5, 10, 50]
+
+n_query_per_batch: 8
+num_workers: 4
+sub_batch_size: 150
+max_input_length: 512
+
+gpu_list: [0, 1]
+n_device: 2
+
+is_training: False

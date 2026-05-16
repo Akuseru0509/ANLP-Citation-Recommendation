@@ -1,0 +1,27 @@
+initial_model_path: "allenai/scibert_scivocab_uncased"
+model_folder: "../checkpoints"
+final_folder: "../checkpoints/final"
+log_folder: "../logs"
+log_file_name: "train.log"
+paper_database_path: "../../../../data/papers.json"
+context_database_path: "../../../../data/contexts.json"
+train_corpus_path: "../../../../data/train.json"
+
+num_epochs: 1
+n_query_per_batch: 4
+num_workers: 2
+initial_learning_rate: 1e-5
+l2_weight: 1e-2
+base_margin: 0.1
+
+rerank_top_K: 500
+max_input_length: 512
+n_document: 10
+max_n_positive: 1
+
+print_every: 200
+save_every: 1000
+max_num_checkpoints: 2
+
+gpu_list: [0, 1]
+n_device: 2

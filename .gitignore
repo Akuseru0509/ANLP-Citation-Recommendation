@@ -2,6 +2,6 @@
 data
 .streamlit
 src/backend/db
-src/backend/model/*.pt
+src/backend/model/checkpoints/*.pt
 src/dao/.env
 src/backend/scripts/utils/.env
