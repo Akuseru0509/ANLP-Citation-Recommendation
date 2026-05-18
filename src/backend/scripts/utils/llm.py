@@ -1,8 +1,12 @@
 from groq import Groq
 import os
 import dotenv
+from pathlib import Path
 
-dotenv.load_dotenv()
+BASE_DIR = Path(__file__).parents[0].parents[0]
+ENV_PATH = BASE_DIR / ".env"
+
+dotenv.load_dotenv(ENV_PATH)
 
 API_KEY = os.getenv("API_KEY")
 client = Groq(api_key=API_KEY)

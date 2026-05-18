@@ -1,16 +1,14 @@
-"""
-app.py — CiteSense Streamlit entry point.
-
-Run with:
-    streamlit run src/frontend/app.py
-"""
-
 import streamlit as st
+from pathlib import Path
+import requests
 
-from data import mock_recommend
-from components import render_paper_card
+from components.components import render_paper_card
 
-# ─── Page Config ──────────────────────────────────────────────────────────────
+BASE_DIR = Path(__file__).parents[0].resolve()
+STYLES_DIR = BASE_DIR / "styles" / "style.css"
+
+print(STYLES_DIR)
+
 st.set_page_config(
     page_title="CiteSense — Citation Recommendation",
     page_icon="🔬",
@@ -18,20 +16,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ─── Load CSS ─────────────────────────────────────────────────────────────────
-def load_css(path: str = "src/frontend/style.css") -> None:
+def load_css(path: str) -> None:
     try:
-        with open(path) as f:
+        with open(path, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
         pass
 
-load_css()
+load_css(path=str(STYLES_DIR))
 
-# ─── Layout ───────────────────────────────────────────────────────────────────
 main_left, main_right = st.columns([1, 2], gap="large")
 
-# ── Left panel: query input (stays fixed) ─────────────────────────────────────
 with main_left:
     st.markdown(
         """
@@ -61,6 +56,7 @@ with main_left:
         '<div class="input-label" style="margin-top: 2rem;">🗓️ Year Range</div>',
         unsafe_allow_html=True,
     )
+
     year_range = st.slider(
         "Publication year",
         min_value=2015,
@@ -81,24 +77,42 @@ with main_left:
         st.session_state.pop("results", None)
         st.rerun()
 
-    # ── Search execution ──────────────────────────────────────────────────────
     if search_btn:
         if not query_text.strip():
             st.warning("⚠️ Please enter a query.")
         else:
             with st.spinner("🔎 Analysing..."):
-                results = mock_recommend(query_text, year_range, top_k=10)
-            st.session_state["results"] = results
-            st.session_state["query_used"] = query_text
+                try:
+                    base_url = st.secrets["BACKEND_URL"]
+                    query_url = f"{base_url}/query"
 
-# ── Right panel: scrollable results ───────────────────────────────────────────
+                    params = {
+                        "query":query_text,
+                        "start_year": year_range[0],
+                        "end_year": year_range[1],
+                    }
+
+                    response = requests.post(
+                        url=query_url,
+                        params=params,
+                        timeout=10,
+                    )
+
+                    response.raise_for_status()
+                    results = response.json()
+                    
+                    st.session_state["results"] = results
+                    st.session_state["query_used"] = query_text
+                except requests.exceptions.RequestException as e:
+                    st.error(f"API Error: {e}")
+
 with main_right:
     if "results" in st.session_state:
         results = st.session_state["results"]
 
         if not results:
             st.markdown(
-                '<div class="no-results">😔 No papers matched your filters.</div>',
+                '<div class="no-results">No papers matched your filters.</div>',
                 unsafe_allow_html=True,
             )
         else:
@@ -112,6 +126,7 @@ with main_right:
                 """,
                 unsafe_allow_html=True,
             )
+
             for i, paper in enumerate(results):
                 render_paper_card(paper, i)
     else:
@@ -119,7 +134,7 @@ with main_right:
             """
             <div style="height:100%;min-height:60vh;display:flex;flex-direction:column;
                         align-items:center;justify-content:center;color:var(--text-muted);">
-                <div style="font-size:3rem;margin-bottom:1rem;">📚</div>
+                <div style="font-size:3rem;margin-bottom:1rem;"></div>
                 <h3 style="color:var(--text-secondary);margin-bottom:0.5rem;">Ready to discover</h3>
                 <p>Your recommended papers and summaries will appear here.</p>
             </div>

@@ -4,4 +4,5 @@ data
 src/backend/db
 src/backend/model/checkpoints/*.pt
 src/dao/.env
-src/backend/scripts/utils/.env
+src/backend/scripts/.env
+src/frontend/.env

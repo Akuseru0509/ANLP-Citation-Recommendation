@@ -83,7 +83,7 @@ class Prefetcher:
     def _query_chroma_batch(self, embeddings: list[list[float]]) -> list[list[str]]:
         return self.collection.query(
             query_embeddings=embeddings,
-            n_results=self.rerank_top_K,
+            n_results=self.rerank_top_K + 1,
             include=["metadatas"],
         )["ids"]
 
@@ -101,6 +101,9 @@ class Prefetcher:
                 [self._build_query_text(job) for job in batch_jobs]
             )
             for corpus_idx, retrieved_ids in zip(batch_idx, self._query_chroma_batch(embeddings)):
+                if ("".join(corpus[corpus_idx]["positive_ids"]) in retrieved_ids):
+                    retrieved_ids.remove("".join(corpus[corpus_idx]["positive_ids"]))
+
                 corpus[corpus_idx]["prefetched_ids"] = retrieved_ids
 
         return corpus

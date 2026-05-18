@@ -3,6 +3,13 @@ utils.py — Pure helper / formatting functions for CiteSense.
 No Streamlit imports; safe to unit-test independently.
 """
 
+def parse_url(url):
+    port = url[-4:]
+    slash_index = url.rfind("/")
+    colon_index = url.rfind(":")
+    host = url[slash_index + 1:colon_index]
+
+    return host, port
 
 def score_color(score: float) -> str:
     """Return a hex colour for dark-mode display based on the relevance score."""

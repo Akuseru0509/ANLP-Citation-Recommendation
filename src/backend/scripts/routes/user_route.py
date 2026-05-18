@@ -42,8 +42,8 @@ def get_queried_papers(request: Request):
     params = request.query_params
 
     query = params.get("query")
-    start = int(params.get("start_year"))
-    end = int(params.get("end_year"))
+    start = params.get("start_year")
+    end = params.get("end_year")
 
     results = collection.query(
         query_texts=[query],

@@ -1,40 +1,9 @@
-"""
-components.py — Reusable Streamlit UI components for CiteSense.
-
-Exports
--------
-paper_detail_dialog  :  @st.dialog popout with full paper details
-render_paper_card    :  paper widget using st.container(border=True)
-"""
-
 import time
 import streamlit as st
-from utils import score_color, score_label, format_authors, apa_citation
-
-
-# ─── Mock Summarization ──────────────────────────────────────────────────────
-
-def _mock_summarize(paper: dict) -> str:
-    """
-    Placeholder summarization — replace with a real LLM call.
-    Returns a short summary of the paper.
-    """
-    time.sleep(1.2)  # Simulate API latency
-    # Return a mock summary based on the paper data
-    return (
-        f"This paper introduces {paper['title'].split(':')[0].lower()} and presents "
-        f"key contributions in the area of {', '.join(paper['keywords'][:2])}. "
-        f"Published at {paper['venue']} in {paper['year']}, it has been cited "
-        f"{paper['citations']:,} times, demonstrating significant impact in the field. "
-        f"The authors propose novel methods that address limitations of prior work."
-    )
-
-
-# ─── Detail Dialog ────────────────────────────────────────────────────────────
+from utils.utils import score_color, score_label, format_authors
 
 @st.dialog("📄 Paper Details", width="large")
 def paper_detail_dialog() -> None:
-    """Full-detail modal dialog for a single paper."""
     paper = st.session_state.get("_dialog_paper")
     if paper is None:
         return
@@ -63,34 +32,15 @@ def paper_detail_dialog() -> None:
     st.markdown("**Abstract**")
     st.markdown(paper["abstract"])
 
-    st.markdown("**Keywords**")
-    st.markdown("  ".join(f"`{kw}`" for kw in paper["keywords"]))
-    st.divider()
-
-    st.markdown("**APA Citation**")
-    st.code(apa_citation(paper), language=None)
-
 
 # ─── Paper Widget Card ───────────────────────────────────────────────────────
 
 def render_paper_card(paper: dict, index: int) -> None:
-    """
-    Render one paper as a self-contained widget.
-
-    Uses st.container(border=True) for the card, with:
-    - Rank + score badge
-    - Title, authors, meta
-    - Keywords
-    - Collapsible abstract
-    - Summarize button with inline summary display
-    - Like + Details buttons
-    """
     sc    = paper["score"]
     color = score_color(sc)
     label = score_label(sc)
     authors_display = format_authors(paper["authors"])
 
-    # ── Session state keys
     like_key       = f"like_{paper['id']}"
     like_count_key = f"like_count_{paper['id']}"
     summary_key    = f"summary_{paper['id']}"
@@ -103,9 +53,7 @@ def render_paper_card(paper: dict, index: int) -> None:
     liked      = st.session_state[like_key]
     like_count = st.session_state[like_count_key]
 
-    # ── Widget container
     with st.container(border=True):
-        # Rank + score badge
         st.markdown(
             f'<div style="display:flex;align-items:center;gap:0.5rem;">'
             f'<span style="font-size:0.64rem;font-weight:800;color:var(--text-muted);'
@@ -119,17 +67,12 @@ def render_paper_card(paper: dict, index: int) -> None:
             unsafe_allow_html=True,
         )
 
-        # Title
         st.markdown(f"**[{paper['title']}]({paper['url']})**")
 
-        # Meta
         st.caption(
-            f"👤 {authors_display}  ·  📍 {paper['venue']}  ·  "
+            f"👤 {authors_display}  ·  "
             f"📅 {paper['year']}  ·  🔗 {paper['citations']:,} cites"
         )
-
-        # Keywords
-        st.markdown("  ".join(f"`{kw}`" for kw in paper["keywords"]))
 
         # Abstract (collapsible)
         with st.expander("Abstract", expanded=False):
@@ -145,7 +88,7 @@ def render_paper_card(paper: dict, index: int) -> None:
                 use_container_width=True,
             ):
                 with st.spinner("Summarizing..."):
-                    summary = _mock_summarize(paper)
+                    summary = paper["abstract"]
                 st.session_state[summary_key] = summary
                 st.rerun()
 

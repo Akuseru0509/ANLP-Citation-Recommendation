@@ -1,8 +1,8 @@
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from .middlewares.query_middlewares import verify_query
-from .routes.user_route import user_route
+from src.backend.scripts.middlewares.query_middlewares import verify_query
+from src.backend.scripts.routes.user_route import user_route
 
 
 app = FastAPI()
