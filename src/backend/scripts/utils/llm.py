@@ -11,7 +11,7 @@ dotenv.load_dotenv(ENV_PATH)
 API_KEY = os.getenv("API_KEY")
 client = Groq(api_key=API_KEY)
 
-def needs_citation(query: str) -> bool:
+def llm_classifier(query: str) -> bool:
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         max_tokens=5,

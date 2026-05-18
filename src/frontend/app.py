@@ -84,7 +84,7 @@ with main_left:
             with st.spinner("🔎 Analysing..."):
                 try:
                     base_url = st.secrets["BACKEND_URL"]
-                    query_url = f"{base_url}/query"
+                    query_url = f"{base_url}/query/"
 
                     params = {
                         "query":query_text,
@@ -92,7 +92,7 @@ with main_left:
                         "end_year": year_range[1],
                     }
 
-                    response = requests.post(
+                    response = requests.get(
                         url=query_url,
                         params=params,
                         timeout=10,

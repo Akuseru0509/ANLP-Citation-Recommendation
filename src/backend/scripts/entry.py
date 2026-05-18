@@ -1,9 +1,10 @@
-from init import app
 import uvicorn
 import dotenv
 from pathlib import Path
 import os
-from src.backend.scripts.utils.utils import parse_url
+
+from scripts.__init__ import app
+from scripts.utils.utils import parse_url
 
 BASE_DIR = Path(__file__).parents[0].resolve()
 ENV_DIR = BASE_DIR / ".env"

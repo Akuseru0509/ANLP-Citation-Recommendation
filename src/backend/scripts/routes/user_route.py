@@ -1,10 +1,15 @@
-from fastapi import Request
+from fastapi import Request, APIRouter, Depends
 from fastapi.responses import JSONResponse
 
-from src.backend.db.chroma import collection
-from src.backend.scripts.init import router
-from src.backend.scripts.utils.scibert import scibert_reranking
-from src.backend.scripts.utils.llm import summarize
+from db.chroma import collection
+from scripts.utils.scibert import ModelInference
+from scripts.utils.llm import summarize
+from scripts.middlewares.query_middlewares import verify_query
+
+router = APIRouter(
+    prefix="/query",
+    dependencies=[Depends(verify_query)]
+)
 
 @router.post("/{paper_id}")
 def add_ratings(paper_id: str):
@@ -47,16 +52,17 @@ def get_queried_papers(request: Request):
 
     results = collection.query(
         query_texts=[query],
-        n_results=20,
+        n_results=100,
         where={
-            "year": {
-                "$gte": start,
-                "$lte": end
-            }
+            "$and": [
+                {"year": {"$gte": int(start)}},
+                {"year": {"$lte": int(end)}}
+            ]
         }
     )
 
-    results = scibert_reranking(query, results)
+    reranker = ModelInference.load()
+    results = ModelInference.scibert_reranking(reranker, query, results)
 
     if results is None:
         return JSONResponse(
