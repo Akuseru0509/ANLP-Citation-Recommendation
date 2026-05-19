@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
-/* ─── Tokens ──────────────────────────────────────────── */
 :root {
   --bg-base:         #0c0e16;
   --bg-surface:      #111422;
@@ -29,10 +28,8 @@
   --transition:      all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ─── Base Reset ──────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Force JetBrains Mono globally */
 html, body, [class*="css"],
 .stApp, .stApp *,
 .stMarkdown, .stMarkdown *,
@@ -49,41 +46,27 @@ input, textarea, select, button, label,
   color: var(--text-primary) !important;
 }
 
-/* ─── Hide Streamlit chrome ───────────────────────────── */
 header[data-testid="stHeader"] { display: none !important; }
 footer { display: none !important; }
 #MainMenu { visibility: hidden !important; }
 
-/* ─── Main layout ─────────────────────────────────────── */
 .main .block-container {
   padding: 2rem 2.5rem 2rem !important;
   max-width: 1440px !important;
 }
 
-/* ═══════════════════════════════════════════
-   SCROLLABLE RESULTS PANEL
-   ═══════════════════════════════════════════
-
-   The right column (2nd of the [1, 2] split) should scroll
-   independently while the left panel stays fixed.
-   We target the second column inside the main horizontal block.
-*/
-
-/* Lock the left panel in place */
 div[data-testid="stColumns"] > div:first-child {
   position: sticky;
   top: 2rem;
   align-self: flex-start;
 }
 
-/* Make the right column a scroll container */
 div[data-testid="stColumns"] > div:nth-child(2) {
   max-height: calc(100vh - 4rem);
   overflow-y: auto;
   padding-right: 0.5rem;
 }
 
-/* Custom scrollbar for the results panel */
 div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar {
   width: 5px;
 }
@@ -98,9 +81,6 @@ div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
 }
 
-/* ═══════════════════════════════════════════
-   INPUT CONTROLS
-   ═══════════════════════════════════════════ */
 .input-label {
   font-size: 0.78rem;
   font-weight: 700;
@@ -110,7 +90,6 @@ div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
   margin-bottom: 0.4rem;
 }
 
-/* Textarea */
 .stTextArea textarea {
   background: var(--bg-card) !important;
   border: 1px solid var(--border) !important;
@@ -128,11 +107,9 @@ div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
 }
 .stTextArea textarea::placeholder { color: var(--text-muted) !important; }
 
-/* Slider */
 .stSlider > div > div > div > div { background: var(--accent) !important; }
 .stSlider > div > div > div { background: var(--border) !important; }
 
-/* Buttons */
 .stButton > button {
   border-radius: var(--radius-sm) !important;
   font-weight: 600 !important;
@@ -162,9 +139,6 @@ div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
   color: var(--text-primary) !important;
 }
 
-/* ═══════════════════════════════════════════
-   GRADIENT TEXT
-   ═══════════════════════════════════════════ */
 .gradient-text {
   background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%);
   -webkit-background-clip: text;
@@ -172,9 +146,6 @@ div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
   background-clip: text;
 }
 
-/* ═══════════════════════════════════════════
-   RESULTS HEADER
-   ═══════════════════════════════════════════ */
 .results-header {
   display: flex;
   flex-direction: column;
@@ -193,9 +164,6 @@ div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
   font-style: italic;
 }
 
-/* ═══════════════════════════════════════════
-   NO RESULTS
-   ═══════════════════════════════════════════ */
 .no-results {
   text-align: center;
   color: var(--text-muted);
@@ -206,9 +174,6 @@ div[data-testid="stColumns"] > div:nth-child(2)::-webkit-scrollbar-thumb:hover {
   border-radius: var(--radius-lg);
 }
 
-/* ═══════════════════════════════════════════
-   PAPER WIDGET  (st.container border=True)
-   ═══════════════════════════════════════════ */
 div[data-testid="stVerticalBlockBorderWrapper"] > div {
   background: var(--bg-card) !important;
   border-color: var(--border) !important;
@@ -220,7 +185,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover > div {
   box-shadow: var(--shadow-card), var(--shadow-glow) !important;
 }
 
-/* Expander (abstract) */
 .stExpander {
   background: transparent !important;
   border: 1px solid var(--border) !important;
@@ -235,9 +199,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover > div {
   font-weight: 600 !important;
 }
 
-/* ═══════════════════════════════════════════
-   SUMMARY DISPLAY AREA
-   ═══════════════════════════════════════════ */
 .summary-box {
   background: rgba(99,102,241,0.06);
   border: 1px solid rgba(99,102,241,0.2);
@@ -253,9 +214,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover > div {
   font-weight: 700;
 }
 
-/* ═══════════════════════════════════════════
-   MISC OVERRIDES
-   ═══════════════════════════════════════════ */
 div[data-testid="stMetricValue"] { font-size: 1rem !important; color: var(--text-primary) !important; }
 div[data-testid="stMetricLabel"]  { color: var(--text-muted) !important; }
 .stCodeBlock { border-radius: var(--radius-sm) !important; border: 1px solid var(--border) !important; }
@@ -263,13 +221,11 @@ div[data-testid="stMetricLabel"]  { color: var(--text-muted) !important; }
 .stAlert { border-radius: var(--radius-md) !important; border: none !important; }
 hr { border-color: var(--border) !important; margin: 0.8rem 0 !important; }
 
-/* Scrollbar (global fallback) */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-/* Responsive */
 @media (max-width: 768px) {
   .main .block-container { padding: 1rem 1rem 2rem !important; }
   div[data-testid="stColumns"] > div:nth-child(2) { max-height: none; overflow-y: visible; }

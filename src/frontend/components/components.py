@@ -12,7 +12,7 @@ def paper_detail_dialog() -> None:
     color = score_color(sc)
     label = score_label(sc)
 
-    st.markdown(f"### [{paper['title']}]({paper['url']})")
+    st.markdown(f"### [{paper['title']}]")
     st.markdown(
         f'<span style="display:inline-block;background:{color}15;border:1px solid {color}44;'
         f'color:{color};border-radius:999px;padding:0.18rem 0.7rem;font-size:0.72rem;'
@@ -33,24 +33,19 @@ def paper_detail_dialog() -> None:
     st.markdown(paper["abstract"])
 
 
-# ─── Paper Widget Card ───────────────────────────────────────────────────────
-
 def render_paper_card(paper: dict, index: int) -> None:
-    sc    = paper["score"]
+    sc = paper["score"]
     color = score_color(sc)
     label = score_label(sc)
-    authors_display = format_authors(paper["authors"])
+    authors_display = format_authors(paper["metadata"].get("authors"))
 
-    like_key       = f"like_{paper['id']}"
+    like_key = f"like_{paper['id']}"
     like_count_key = f"like_count_{paper['id']}"
-    summary_key    = f"summary_{paper['id']}"
 
-    if like_key not in st.session_state:
-        st.session_state[like_key] = False
-    if like_count_key not in st.session_state:
-        st.session_state[like_count_key] = 0
+    st.session_state.setdefault(like_key, False)
+    st.session_state.setdefault(like_count_key, 0)
 
-    liked      = st.session_state[like_key]
+    liked = st.session_state[like_key]
     like_count = st.session_state[like_count_key]
 
     with st.container(border=True):
@@ -67,33 +62,30 @@ def render_paper_card(paper: dict, index: int) -> None:
             unsafe_allow_html=True,
         )
 
-        st.markdown(f"**[{paper['title']}]({paper['url']})**")
+        st.markdown(f"**[{paper["metadata"].get("title")}]**")
 
         st.caption(
-            f"👤 {authors_display}  ·  "
-            f"📅 {paper['year']}  ·  🔗 {paper['citations']:,} cites"
+            f"Authors: {authors_display}"
+            f"Year: {paper["metadata"].get("year")}"
         )
 
-        # Abstract (collapsible)
         with st.expander("Abstract", expanded=False):
-            st.markdown(paper["abstract"])
+            st.markdown(paper["metadata"].get("abstract"))
 
-        # ── Summarize section
         sum_col, like_col, detail_col, _ = st.columns([1.5, 1.3, 1.2, 2.0])
 
         with sum_col:
-            if st.button(
-                "✨ Summarize" if summary_key not in st.session_state else "🔄 Re-summarize",
-                key=f"sum_{paper['id']}_btn",
-                use_container_width=True,
-            ):
-                with st.spinner("Summarizing..."):
-                    summary = paper["abstract"]
-                st.session_state[summary_key] = summary
-                st.rerun()
+            summary = paper["metadata"].get("summary")
+
+            if summary:
+                st.markdown("### Summary")
+                st.write(summary)
+
+            else:
+                st.info("No summary available.")
 
         with like_col:
-            like_txt = f"💖 Liked · {like_count}" if liked else f"❤️ Like · {like_count}"
+            like_txt = f"Liked: {like_count}" if liked else f"Like: {like_count}"
             if st.button(like_txt, key=f"like_{paper['id']}_btn", use_container_width=True):
                 if liked:
                     st.session_state[like_key] = False
@@ -104,16 +96,6 @@ def render_paper_card(paper: dict, index: int) -> None:
                 st.rerun()
 
         with detail_col:
-            if st.button("📄 Details", key=f"details_{paper['id']}", use_container_width=True):
+            if st.button("Details", key=f"details_{paper['id']}", use_container_width=True):
                 st.session_state["_dialog_paper"] = paper
                 paper_detail_dialog()
-
-        # ── Display summary if available
-        if summary_key in st.session_state:
-            st.markdown(
-                f'<div class="summary-box">'
-                f'<strong>✨ AI Summary</strong><br>'
-                f'{st.session_state[summary_key]}'
-                f'</div>',
-                unsafe_allow_html=True,
-            )

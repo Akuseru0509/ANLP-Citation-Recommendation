@@ -51,7 +51,7 @@ class ModelInference:
     
     @st.cache_resource
     def load():
-        reranker = ModelInference
+        reranker = ModelInference()
 
         return reranker
 
@@ -71,7 +71,7 @@ class ModelInference:
             concat_query = (query_text, " ".join(["title:", meta.get("title"), "abstract:", meta.get("abstract")]))
 
             base = 1.0 / distance + 1e-6
-            relevance_scores = reranker._infer(concat_query)
+            relevance_scores = reranker._infer(concat_query) * 100
             user_preference_scores = meta["ratings"]
 
             scores[i] += relevance_scores + base + user_preference_scores
@@ -79,7 +79,7 @@ class ModelInference:
         current_threshold = threshold
 
         while True:
-            kept_indices = [i for i in range(n) if scores[i] >= current_threshold]
+            kept_indices = [i for i in range(n) if float(scores[i]) >= current_threshold]
 
             if kept_indices is not None:
                 break
@@ -94,12 +94,15 @@ class ModelInference:
 
         kept_indices.sort(key=lambda i: scores[i], reverse=True)
 
-        sorted_results = {
-            "ids": [[ids[i] for i in kept_indices]],
-            "documents": [[docs[i] for i in kept_indices]],
-            "metadatas": [[metas[i] for i in kept_indices]],
-            "distances": [[dists[i] for i in kept_indices]],
-            "scores": [[scores[i] for i in kept_indices]]
-        }
+        sorted_results = [
+            {
+                "id": ids[i],
+                "document": docs[i],
+                "metadata": metas[i],
+                "distance": dists[i],
+                "score": scores[i]
+            }
+            for i in kept_indices
+        ]
 
         return sorted_results
