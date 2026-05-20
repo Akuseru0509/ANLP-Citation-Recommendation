@@ -1,37 +1,6 @@
 import time
 import streamlit as st
-from utils.utils import score_color, score_label, format_authors
-
-@st.dialog("📄 Paper Details", width="large")
-def paper_detail_dialog() -> None:
-    paper = st.session_state.get("_dialog_paper")
-    if paper is None:
-        return
-
-    sc = paper["score"]
-    color = score_color(sc)
-    label = score_label(sc)
-
-    st.markdown(f"### [{paper['title']}]")
-    st.markdown(
-        f'<span style="display:inline-block;background:{color}15;border:1px solid {color}44;'
-        f'color:{color};border-radius:999px;padding:0.18rem 0.7rem;font-size:0.72rem;'
-        f'font-weight:700;">{sc:.0%} — {label}</span>',
-        unsafe_allow_html=True,
-    )
-    st.divider()
-
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("📅 Year",      paper["year"])
-    m2.metric("📍 Venue",     paper["venue"])
-    m3.metric("🔗 Citations", f"{paper['citations']:,}")
-    m4.metric("🎯 Score",     f"{sc:.0%}")
-    st.caption("**Authors:** " + ", ".join(paper["authors"]))
-    st.divider()
-
-    st.markdown("**Abstract**")
-    st.markdown(paper["abstract"])
-
+from utils.utils import score_color, score_label
 
 def render_paper_card(paper: dict, index: int) -> None:
     sc = paper["score"]

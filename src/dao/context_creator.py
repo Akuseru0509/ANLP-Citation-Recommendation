@@ -17,7 +17,6 @@ BASE = "https://api.semanticscholar.org/graph/v1"
 DATASET_BASE = "https://api.semanticscholar.org/datasets/v1"
 HEADERS = {"x-api-key": API_KEY}
 
-
 class ContextCreator():
     def __init__(self, data_path):
         self.data_path = data_path
@@ -44,23 +43,26 @@ class ContextCreator():
                 retry_after = int(resp.headers.get("Retry-After", 5))
                 time.sleep(retry_after)
                 continue
+
             elif resp.status_code != 200:
-                print(f"  Batch error {resp.status_code}: {resp.text[:200]}")
+                print(f"Batch error {resp.status_code}: {resp.text[:200]}")
                 time.sleep(2)
                 continue
 
             for item in resp.json():
                 if not item:
                     continue
+
                 ext = item.get("externalIds") or {}
                 arxiv_id = ext.get("ArXiv", "").strip()
                 s2_id = item.get("paperId", "")
+
                 if arxiv_id and s2_id:
                     mapping[arxiv_id] = s2_id
 
             time.sleep(1.1)
 
-        print(f"  Mapped {len(mapping)} / {len(arxiv_ids)} papers to S2 IDs")
+        print(f"Mapped {len(mapping)} / {len(arxiv_ids)} papers to S2 IDs")
         return mapping
 
     @staticmethod
@@ -69,9 +71,12 @@ class ContextCreator():
             f"{DATASET_BASE}/release/latest/dataset/citations",
             headers=HEADERS
         )
+
         if resp.status_code != 200:
             raise RuntimeError(f"Failed to get dataset URLs: {resp.status_code} {resp.text}")
+        
         urls = resp.json().get("files", [])
+
         print(f"  Found {len(urls)} citation dataset shards")
         return urls
 
@@ -103,13 +108,13 @@ class ContextCreator():
         arxiv_id_set: set[str]
     ) -> list[dict]:
 
-        s2_to_arxiv    = {v: k for k, v in arxiv_to_s2.items()}
-        corpus_s2_set  = set(arxiv_to_s2.values())
-        seen_pairs     = {}
-        contexts       = []
+        s2_to_arxiv = {v: k for k, v in arxiv_to_s2.items()}
+        corpus_s2_set = set(arxiv_to_s2.values())
+        seen_pairs = {}
+        contexts = []
 
-        out_path   = DATA_DIR / "contexts.json"
-        done_path  = DATA_DIR / "done_s2_ids.json"
+        out_path = DATA_DIR / "contexts.json"
+        done_path = DATA_DIR / "done_s2_ids.json"
         pairs_path = DATA_DIR / "intra_pairs.json"
 
         done_ids = set(json.load(open(done_path)) if done_path.exists() else [])
@@ -117,17 +122,21 @@ class ContextCreator():
         if out_path.exists() and done_ids:
             with open(out_path) as f:
                 contexts = json.load(f)
+
             for ctx in contexts:
                 pair_key = (ctx["citing_id"], ctx["refid"])
                 seen_pairs[pair_key] = seen_pairs.get(pair_key, 0) + 1
+
             print(f"Resuming — {len(done_ids)} papers done, {len(contexts)} contexts loaded")
 
         if pairs_path.exists():
             print("Found cached intra_pairs, skipping Phase 1...")
+
             with open(pairs_path) as f:
                 intra_pairs = json.load(f)
         else:
             print("Phase 1: finding intra-corpus citation pairs...")
+
             intra_pairs: dict[str, dict] = {}
             s2_ids = list(arxiv_to_s2.values())
 
@@ -140,9 +149,11 @@ class ContextCreator():
                             params={"fields": "paperId,citations.paperId,citations.externalIds"},
                             json={"ids": chunk}
                         )
+
                         if resp.status_code == 429:
                             time.sleep(int(resp.headers.get("Retry-After", 10)))
                             continue
+
                         elif resp.status_code != 200:
                             print(f"  Batch error {resp.status_code}: {resp.text[:200]}")
                             time.sleep(5)
@@ -151,24 +162,31 @@ class ContextCreator():
                         for paper in resp.json():
                             if not paper:
                                 continue
+
                             cited_s2  = paper.get("paperId", "")
                             if not cited_s2:
                                 continue
+
                             citations = paper.get("citations", [])
                             needs_full_fetch = len(citations) >= 1000
 
                             for citation in citations:
                                 citing_s2 = citation.get("paperId", "")
+
                                 if citing_s2 not in corpus_s2_set:
                                     continue
+
                                 citing_arxiv = s2_to_arxiv.get(citing_s2)
+
                                 if not citing_arxiv:
                                     continue
+
                                 if cited_s2 not in intra_pairs:
                                     intra_pairs[cited_s2] = {
                                         "citing": [],
                                         "needs_full_fetch": needs_full_fetch
                                     }
+
                                 intra_pairs[cited_s2]["citing"].append(citing_arxiv)
 
                         break
@@ -182,7 +200,7 @@ class ContextCreator():
             with open(pairs_path, "w") as f:
                 json.dump(intra_pairs, f)
 
-            print(f"  Found {sum(len(v['citing']) for v in intra_pairs.values())} intra-corpus pairs across {len(intra_pairs)} cited papers")
+            print(f"Found {sum(len(v['citing']) for v in intra_pairs.values())} intra-corpus pairs across {len(intra_pairs)} cited papers")
 
         print("Phase 2: fetching citation contexts...")
 
@@ -190,14 +208,14 @@ class ContextCreator():
             if cited_s2 in done_ids:
                 continue
 
-            cited_arxiv      = s2_to_arxiv.get(cited_s2)
+            cited_arxiv = s2_to_arxiv.get(cited_s2)
             if not cited_arxiv:
                 continue
 
-            citing_set       = set(pair_data["citing"])
+            citing_set = set(pair_data["citing"])
             needs_full_fetch = pair_data["needs_full_fetch"]
-            offset           = 0
-            limit            = 1000
+            offset = 0
+            limit = 1000
 
             while True:
                 success = False
@@ -208,7 +226,7 @@ class ContextCreator():
                             headers=HEADERS,
                             params={
                                 "fields": "paperId,externalIds,contexts,intents",
-                                "limit":  limit,
+                                "limit": limit,
                                 "offset": offset
                             }
                         )
@@ -216,19 +234,17 @@ class ContextCreator():
                             time.sleep(int(resp.headers.get("Retry-After", 10)))
                             continue
                         elif resp.status_code != 200:
-                            print(f"  Error {resp.status_code} for {cited_arxiv}")
+                            print(f"Error {resp.status_code} for {cited_arxiv}")
                             break
 
-                        data  = resp.json()
+                        data = resp.json()
                         items = data.get("data", [])
 
                         for item in items:
                             citing_paper = item.get("citingPaper", {})
-                            ext          = citing_paper.get("externalIds") or {}
+                            ext = citing_paper.get("externalIds") or {}
                             citing_arxiv = ext.get("ArXiv", "").strip()
 
-                            # If needs_full_fetch, accept any corpus paper
-                            # Otherwise only accept known pairs from Phase 1
                             if needs_full_fetch:
                                 if citing_arxiv not in arxiv_id_set:
                                     continue
@@ -238,7 +254,7 @@ class ContextCreator():
 
                             for sentence in item.get("contexts", []):
                                 pair_key = (citing_arxiv, cited_arxiv)
-                                idx      = seen_pairs.get(pair_key, 0)
+                                idx = seen_pairs.get(pair_key, 0)
                                 seen_pairs[pair_key] = idx + 1
                                 
                                 masked = self._normalize_context(sentence, target_position=idx)
@@ -282,6 +298,7 @@ class ContextCreator():
 
         with open(out_path, "w") as f:
             json.dump(contexts, f, indent=2)
+            
         with open(done_path, "w") as f:
             json.dump(list(done_ids), f)
 

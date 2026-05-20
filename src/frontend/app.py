@@ -95,7 +95,7 @@ with main_left:
                     response = requests.get(
                         url=query_url,
                         params=params,
-                        timeout=120,
+                        timeout=180,
                     )
 
                     response.raise_for_status()

@@ -106,3 +106,9 @@ python -m streamlit run src.frontend.app
 
 Once both the backend and frontend are running, open the Streamlit URL provided in the terminal (usually `http://localhost:8501`).
 Enter your abstract or research topic in the **Query** field, adjust the **Year Range**, and hit **Search** to discover relevant papers!
+
+## External Links
+
+- [create_context](https://www.kaggle.com/code/akuseru0001/scibert-training-dataset-prep)
+- [train](https://www.kaggle.com/code/akuseru0001/scibert-train)
+- [test](https://www.kaggle.com/code/akuseru0001/scibert-test)

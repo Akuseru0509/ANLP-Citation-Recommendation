@@ -24,10 +24,3 @@ def score_label(score: float) -> str:
         return "Good"
     else:
         return "Fair"
-
-
-def format_authors(authors: list[str], max_show: int = 3) -> str:
-    """Truncate a long author list to the first *max_show* names."""
-    if len(authors) <= max_show:
-        return ", ".join(authors)
-    return ", ".join(authors[:max_show]) + f" + {len(authors) - max_show} more"
