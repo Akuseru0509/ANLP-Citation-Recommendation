@@ -31,14 +31,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, [class*="css"],
-.stApp, .stApp *,
-.stMarkdown, .stMarkdown *,
+.stApp, .stApp *:not(.material-symbols-rounded):not(.material-icons):not([class*="stIcon"]),
+.stMarkdown, .stMarkdown *:not(.material-symbols-rounded):not(.material-icons),
 .stText, .stCaption, .stAlert, .stAlert *,
-h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th,
+h1, h2, h3, h4, h5, h6, p, a, li, td, th,
 input, textarea, select, button, label,
-[data-testid], [data-testid] *,
+[data-testid]:not([data-testid="stIconMaterial"]), 
+[data-testid]:not([data-testid="stIconMaterial"]) *:not(.material-symbols-rounded),
 [data-baseweb], [data-baseweb] * {
   font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Explicitly restore Material Icons font */
+.material-symbols-rounded, 
+.material-icons, 
+[data-testid="stIconMaterial"],
+[class*="stIcon"] {
+  font-family: 'Material Symbols Rounded', 'Material Icons', sans-serif !important;
 }
 
 .stApp {
@@ -197,6 +206,13 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover > div {
   font-size: 0.76rem !important;
   color: var(--text-muted) !important;
   font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+.stExpander summary svg {
+  flex-shrink: 0 !important;
+  margin-right: 0.25rem !important;
 }
 
 .summary-box {

@@ -43,7 +43,7 @@ with main_left:
         unsafe_allow_html=True,
     )
 
-    st.markdown('<div class="input-label">📄 Query</div>', unsafe_allow_html=True)
+    st.markdown('<div class="input-label">Query</div>', unsafe_allow_html=True)
     query_text = st.text_area(
         "Query",
         placeholder="e.g. We propose a new transformer architecture for citation recommendation...",
@@ -53,7 +53,7 @@ with main_left:
     )
 
     st.markdown(
-        '<div class="input-label" style="margin-top: 2rem;">🗓️ Year Range</div>',
+        '<div class="input-label" style="margin-top: 2rem;">Year Range</div>',
         unsafe_allow_html=True,
     )
 
@@ -79,7 +79,7 @@ with main_left:
 
     if search_btn:
         if not query_text.strip():
-            st.warning("⚠️ Please enter a query.")
+            st.warning("Please enter a query.")
         else:
             with st.spinner("🔎 Analysing..."):
                 try:
