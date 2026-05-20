@@ -29,7 +29,7 @@ def get_summary(result: dict):
         Given the abstract of a retrieved paper, write a concise summary capturing its key findings.
 
         Abstract:
-        {result.get("abstract")}
+        {result["metadata"].get("abstract")}
 
         Write a 3-4 sentence summary that:
         - Captures the key findings, methods, and conclusions
@@ -46,10 +46,8 @@ def get_summary(result: dict):
     
     return response.choices[0].message.content.strip()
 
-def summarize(query, results: list[dict]) -> list[dict]:
+def summarize(results: list[dict]) -> list[dict]:
     for i in range(0, len(results)):
-        results[i].add({
-            "summary": get_summary(query, results[i])
-        })
+        results[i]["summary"] = get_summary(results[i])
 
     return results

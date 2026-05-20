@@ -61,8 +61,8 @@ def get_queried_papers(request: Request):
         }
     )
 
-    reranker = ModelInference.load()
-    results = ModelInference.scibert_reranking(reranker, query, results)
+    reranker = request.app.state.reranker
+    results = ModelInference.scibert_reranking(reranker, query, results, threshold=70.0)
 
     if results is None:
         return JSONResponse(
@@ -72,9 +72,11 @@ def get_queried_papers(request: Request):
             }
         )    
 
-    results = summarize(query, results)
+    results = summarize(results)
+
+    print(results)
 
     return JSONResponse(
         status_code=200, 
-        content=dict(results)
+        content=results
     )

@@ -57,7 +57,7 @@ def render_paper_card(paper: dict, index: int) -> None:
             f'<span style="font-size:0.68rem;font-weight:700;color:{color};'
             f'background:{color}15;border:1px solid {color}44;'
             f'border-radius:999px;padding:0.1rem 0.55rem;">'
-            f'{sc:.0%} · {label}</span>'
+            f'{sc}% · {label}</span>'
             f'</div>',
             unsafe_allow_html=True,
         )
@@ -75,7 +75,7 @@ def render_paper_card(paper: dict, index: int) -> None:
         sum_col, like_col, detail_col, _ = st.columns([1.5, 1.3, 1.2, 2.0])
 
         with sum_col:
-            summary = paper["metadata"].get("summary")
+            summary = paper["summary"]
 
             if summary:
                 st.markdown("### Summary")

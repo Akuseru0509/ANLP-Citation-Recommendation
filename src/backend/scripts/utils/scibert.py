@@ -3,9 +3,10 @@ from pathlib import Path
 from chromadb import QueryResult
 import torch
 from transformers import AutoTokenizer
-import streamlit as st
 
 from model.scripts.scorer import Scorer
+
+torch.set_num_threads(4)
 
 BASE_DIR = Path(__file__).parents[0].parents[0].parents[0].resolve()
 MODEL_DIR = BASE_DIR / "model"
@@ -44,16 +45,10 @@ class ModelInference:
             truncation=True
         )
 
-        with torch.no_grad():
+        with torch.inference_mode():
             score = self.scorer(inputs)
 
         return score
-    
-    @st.cache_resource
-    def load():
-        reranker = ModelInference()
-
-        return reranker
 
     @staticmethod
     def scibert_reranking(reranker, query: str, results: QueryResult, threshold: float = 50.0, decay: float = 0.5, min_threshold: float = 5.0):
@@ -79,7 +74,7 @@ class ModelInference:
         current_threshold = threshold
 
         while True:
-            kept_indices = [i for i in range(n) if float(scores[i]) >= current_threshold]
+            kept_indices = [i for i in range(0, len(scores)) if scores[i].item() >= current_threshold]
 
             if kept_indices is not None:
                 break
@@ -100,7 +95,7 @@ class ModelInference:
                 "document": docs[i],
                 "metadata": metas[i],
                 "distance": dists[i],
-                "score": scores[i]
+                "score": scores[i].item()
             }
             for i in kept_indices
         ]

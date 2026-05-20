@@ -160,7 +160,8 @@ def _infer_with_trained():
         metrics["F1"][K] = f1
 
     print("\n[FINAL] Average metrics over all batches:", flush=True)
-    print(metrics, flush=True)
+    for k, v in metrics.items():
+        print(f"K = {k} -> {v}", flush=True)
 
     with open(f"{args.get("rerank_results_save_path")}/output_trained.pkl", "wb") as f:
         pickle.dump(
