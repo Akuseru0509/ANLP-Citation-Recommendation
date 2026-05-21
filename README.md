@@ -109,6 +109,8 @@ Enter your abstract or research topic in the **Query** field, adjust the **Year 
 
 ## External Links
 
+During the process of making this system, we utilize *Kaggle's* GPUs. The links are available as followed:
+
 - [create_context](https://www.kaggle.com/code/akuseru0001/scibert-training-dataset-prep)
 - [train](https://www.kaggle.com/code/akuseru0001/scibert-train)
 - [test](https://www.kaggle.com/code/akuseru0001/scibert-test)
