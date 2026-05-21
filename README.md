@@ -105,6 +105,14 @@ python -m streamlit run src.frontend.app
 ### 5. Inference
 
 Once both the backend and frontend are running, open the Streamlit URL provided in the terminal (usually `http://localhost:8501`).
+
+The inference process can be done by doing the followings:
+
+- Starting the service in **Section 4**.
+- Enter the *query* that needs a recommended citation and adjust the *year* range. 
+- Click the **Search** button.
+- Wait for the inference, the results will be displayed on the panel on the right.
+
 Enter your abstract or research topic in the **Query** field, adjust the **Year Range**, and hit **Search** to discover relevant papers!
 
 ## External Links
