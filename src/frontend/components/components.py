@@ -1,4 +1,4 @@
-import time
+import requests
 import streamlit as st
 from utils.utils import score_color, score_label
 
@@ -11,7 +11,7 @@ def render_paper_card(paper: dict, index: int) -> None:
     like_count_key = f"like_count_{paper['id']}"
 
     st.session_state.setdefault(like_key, False)
-    st.session_state.setdefault(like_count_key, 0)
+    st.session_state[like_count_key] = paper["metadata"].get("ratings", 0)
 
     liked = st.session_state[like_key]
     like_count = st.session_state[like_count_key]
@@ -43,6 +43,22 @@ def render_paper_card(paper: dict, index: int) -> None:
                 else:
                     st.session_state[like_key] = True
                     st.session_state[like_count_key] = like_count + 1
+
+                    try:
+                        base_url = st.secrets["BACKEND_URL"]
+                        query_url = f"{base_url}/query/"
+
+                        params = {
+                            "id": paper["id"]
+                        }
+
+                        requests.post(
+                            query_url,
+                            params=params,
+                            timeout=10
+                        )
+                    except requests.exception.RequestException as e:
+                        st.error(f"API Error: {e}")
                 st.rerun()
 
         author_col, year_col = st.columns([0.8, 0.2])

@@ -2,6 +2,37 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from scripts.utils.llm import llm_classifier
 
+def verify_paper(request: Request):
+    params = request.query_params
+
+    if not params:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "Error": "Missing Query Params"
+            }
+        )
+    
+    if (len(params.keys() > 1)):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "Error": "Invalid Query Params"
+            }
+        )
+    
+    valid_keys = ["id"]
+
+    for key in params.keys():
+        if key not in valid_keys:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "Error": "Invalid Query Params"
+                }
+            )
+
+
 def verify_query(request: Request):
     params = request.query_params
 

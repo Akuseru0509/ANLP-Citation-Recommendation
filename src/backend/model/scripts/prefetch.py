@@ -37,8 +37,7 @@ class Prefetcher:
 
 
     @staticmethod
-    def build_corpus(train_metadata: list, test_metadata: list,
-                    context_list: list,
+    def build_corpus(train_metadata: list, test_metadata: list, context_list: list,
                     train_output: str = "train_corpus.json",
                     test_output: str = "test_corpus.json") -> tuple[list[dict], list[dict]]:
 
@@ -46,8 +45,8 @@ class Prefetcher:
             meta_ids = {m["id"] for m in metadata}
             return [
                 {
-                    "context_id":     ctx["context_id"],
-                    "positive_ids":   [ctx["refid"]],
+                    "context_id": ctx["context_id"],
+                    "positive_ids": [ctx["refid"]],
                     "prefetched_ids": [],
                 }
                 for ctx in contexts
@@ -55,7 +54,7 @@ class Prefetcher:
             ]
 
         train_corpus = _build(train_metadata, context_list)
-        test_corpus = _build(test_metadata,  context_list)
+        test_corpus = _build(test_metadata, context_list)
 
         for corpus, path in [(train_corpus, train_output), (test_corpus, test_output)]:
             Path(path).parent.mkdir(parents=True, exist_ok=True)
@@ -94,7 +93,7 @@ class Prefetcher:
         ]
 
         for start in tqdm(range(0, len(pending), self.batch_size), desc="Prefetching"):
-            batch_idx  = pending[start : start + self.batch_size]
+            batch_idx = pending[start : start + self.batch_size]
             batch_jobs = [corpus[i] for i in batch_idx]
 
             embeddings = self._embed_batch(
@@ -109,13 +108,12 @@ class Prefetcher:
         return corpus
 
     def _run(self, input_path: str, output_path: Optional[str] = None, overwrite: bool = False) -> list[dict]:
-        input_path  = Path(input_path)
+        input_path = Path(input_path)
         output_path = Path(output_path) if output_path else input_path
 
         load_path = (output_path if (not overwrite and output_path.exists()) else input_path)
 
         corpus = json.load(open(load_path))
-
         corpus = self._prefetch(corpus)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -4,14 +4,13 @@ from fastapi.responses import JSONResponse
 from db.chroma import collection
 from scripts.utils.scibert import ModelInference
 from scripts.utils.llm import summarize
-from scripts.middlewares.query_middlewares import verify_query
+from scripts.middlewares.query_middlewares import verify_query, verify_paper
 
 router = APIRouter(
-    prefix="/query",
-    dependencies=[Depends(verify_query)]
+    prefix="/query"
 )
 
-@router.post("/{paper_id}")
+@router.post("/{paper_id}", dependencies=[Depends(verify_paper)])
 def add_ratings(paper_id: str):
     result = collection.get(ids=[paper_id], include=["metadatas"])
 
@@ -43,7 +42,7 @@ def add_ratings(paper_id: str):
     )
 
 @router.get("/")
-def get_queried_papers(request: Request):
+def get_queried_papers(request: Request, dependencies=[Depends(verify_query)]):
     params = request.query_params
 
     query = params.get("query")
@@ -73,8 +72,6 @@ def get_queried_papers(request: Request):
         )    
 
     results = summarize(results)
-
-    print(results)
 
     return JSONResponse(
         status_code=200, 

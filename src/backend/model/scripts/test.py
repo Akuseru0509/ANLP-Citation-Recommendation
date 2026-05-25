@@ -16,7 +16,7 @@ from tqdm.auto import tqdm
 import numpy as np
 
 from scorer import Scorer
-from rerank_dataset import RerankDataset
+from rerank_dataset import RerankDatasetForTesting
 
 BASE_DIR = Path(__file__).parents[0].parents[0].resolve()
 CONFIG_DIR = BASE_DIR / "configs"
@@ -52,7 +52,7 @@ def _infer_with_trained():
         'additional_special_tokens': ['<cit>']
     })
     
-    rerank_dataset = RerankDataset(corpus, **dataset_kwargs, tokenizer=tokenizer)
+    rerank_dataset = RerankDatasetForTesting(corpus, **dataset_kwargs, tokenizer=tokenizer)
     dataloader = DataLoader(rerank_dataset, **loader_kwargs)
     
     vocab_size = len(tokenizer)
@@ -121,17 +121,11 @@ def _infer_with_trained():
 
             hit_matrix = (sorted_irrelevance_levels_arr == rerank_dataset.irrelevance_level_for_positive)
 
-            metrics = {"precision": {}, "recall": {}, "F1": {}}
-            eps = 1e-12
-
-            for K in args.get("K_list"):
+            metrics = {"recall": {}}
+            for K in args.K_list:
                 top_k_hits = hit_matrix[:, :K]
                 recall = (top_k_hits.sum(axis=1) / num_positive_ids_arr).mean()
-                precision = top_k_hits.mean(axis=1).mean()
-                f1 = 2 * precision * recall / (precision + recall + eps)
-                metrics["precision"][K] = precision
                 metrics["recall"][K] = recall
-                metrics["F1"][K] = f1
 
             print(f"\n[Batch {count + 1}] Cumulative avg metrics so far:", flush=True)
             for k, v in metrics.items():
@@ -147,21 +141,14 @@ def _infer_with_trained():
 
     hit_matrix = (sorted_irrelevance_levels_arr == rerank_dataset.irrelevance_level_for_positive)
 
-    metrics = {"precision": {}, "recall": {}, "F1": {}}
-    eps = 1e-12
-
-    for K in args.get("K_list"):
+    metrics = {"recall": {}}
+    for K in args.K_list:
         top_k_hits = hit_matrix[:, :K]
         recall = (top_k_hits.sum(axis=1) / num_positive_ids_arr).mean()
-        precision = top_k_hits.mean(axis=1).mean()
-        f1 = 2 * precision * recall / (precision + recall + eps)
-        metrics["precision"][K] = precision
         metrics["recall"][K] = recall
-        metrics["F1"][K] = f1
 
     print("\n[FINAL] Average metrics over all batches:", flush=True)
-    for k, v in metrics.items():
-        print(f"K = {k} -> {v}", flush=True)
+    print(metrics, flush=True)
 
     with open(f"{args.get("rerank_results_save_path")}/output_trained.pkl", "wb") as f:
         pickle.dump(

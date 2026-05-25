@@ -27,6 +27,7 @@ def build_model_input(batch, device):
         "input_ids": batch["input_ids"].to(device),
         "attention_mask": batch["attention_mask"].to(device),
     }
+
     if "token_type_ids" in batch:
         inp["token_type_ids"] = batch["token_type_ids"].to(device)
     
