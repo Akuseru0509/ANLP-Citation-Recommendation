@@ -1,0 +1,2 @@
+base_model: "allenai/scibert_scivocab_uncased"
+train: "model_batch_5072.pt"

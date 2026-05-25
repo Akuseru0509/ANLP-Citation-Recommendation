@@ -1,0 +1,53 @@
+from groq import Groq
+import os
+import dotenv
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parents[0].parents[0]
+ENV_PATH = BASE_DIR / ".env"
+
+dotenv.load_dotenv(ENV_PATH)
+
+API_KEY = os.getenv("API_KEY")
+client = Groq(api_key=API_KEY)
+
+def llm_classifier(query: str) -> bool:
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        max_tokens=5,
+        temperature=0,
+        messages=[{
+            "role": "user",
+            "content": f"Does this statement make a factual claim that requires evidence or a reference to verify? Answer YES or NO only.\nStatement: {query}"
+        }]
+    )
+
+    return response.choices[0].message.content.strip().upper() == "YES"
+
+def get_summary(result: dict):
+    prompt = f"""You are a scientific paper assistant.
+        Given the abstract of a retrieved paper, write a concise summary capturing its key findings.
+
+        Abstract:
+        {result["metadata"].get("abstract")}
+
+        Write a 3-4 sentence summary that:
+        - Captures the key findings, methods, and conclusions
+        - Uses precise scientific language
+
+    Summary:"""
+
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        max_tokens=200,
+        temperature=0.3,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    
+    return response.choices[0].message.content.strip()
+
+def summarize(results: list[dict]) -> list[dict]:
+    for i in range(0, len(results)):
+        results[i]["summary"] = get_summary(results[i])
+
+    return results
