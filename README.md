@@ -8,6 +8,8 @@ Welcome to CiteSense, a citation recommendation platform! This repository contai
 - `src/backend/`: FastAPI backend and Chroma vector database setup for handling recommendation logic.
 - `src/frontend/`: Streamlit web interface for users to enter queries and view recommendations.
 - `data/`: The directory where datasets and outputs are stored.
+- `src/dao/.env`: Data preprocess secrets, containing S2 API Key as API_KEY
+- `src/backend/.env`: Backend secrets, containing backend url and Groq API key as BACKEND_URL, API_KEY
 
 ## Setup Instructions
 
