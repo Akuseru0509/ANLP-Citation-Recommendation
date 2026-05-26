@@ -155,7 +155,7 @@ class ContextCreator():
                             continue
 
                         elif resp.status_code != 200:
-                            print(f"  Batch error {resp.status_code}: {resp.text[:200]}")
+                            print(f"Batch error {resp.status_code}: {resp.text[:200]}")
                             time.sleep(5)
                             continue
 
@@ -263,9 +263,9 @@ class ContextCreator():
                                 
                                 contexts.append({
                                     "masked_text": masked,
-                                    "context_id":  f"{citing_arxiv}_{cited_arxiv}_{idx}",
-                                    "citing_id":   citing_arxiv,
-                                    "refid":       cited_arxiv
+                                    "context_id": f"{citing_arxiv}_{cited_arxiv}_{idx}",
+                                    "citing_id": citing_arxiv,
+                                    "refid": cited_arxiv
                                 })
 
                         if len(items) < limit:
